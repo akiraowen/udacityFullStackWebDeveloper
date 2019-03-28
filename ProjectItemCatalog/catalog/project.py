@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
+from flask import jsonify, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from flask import session as login_session
@@ -20,12 +21,13 @@ from database_setup import Base, User, Category, Item
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json', 'r')
+					   .read())['web']['client_id']
 APPLICATION_NAME = "Item Catalog Application"
 
 # Connect to the database and create a database session.
-engine = create_engine('sqlite:///catalog.db', connect_args={'check_same_thread': False})
+engine = create_engine('sqlite:///catalog.db', 
+					   connect_args={'check_same_thread': False})
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -117,49 +119,45 @@ def gconnect():
 
     data = answer.json()
 
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Assing Email as name if User does not have Google+
     if "name" in data:
         login_session['username'] = data['name']
     else:
-        name_corp = data['email'][:data['email'].find("@")]
-        login_session['username'] = name_corp
+        login_session['username'] = data['email'][:data['email'].find("@")]
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    # See if the user exists. If it doesn't, make a new one.
     user_id = get_user_id(data["email"])
-    if not user_id:
+    if user_id:
+    	login_session['user_id'] = user_id
+    else:
         user_id = create_user(login_session)
-    login_session['user_id'] = user_id
-
-    # Show a welcome screen upon successful login.
+    
+    # Display OAuth welcome screen
     output = ''
-    output += '<h2>Welcome, '
-    output += login_session['username']
-    output += '!</h2>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px; '
+    output += '<h2>Welcome, ' + login_session['username'] + '!</h2>'
+    output += '<img src="' + login_session['picture']
+    output += ' " style = "width: 100px; height: 100px; '
     output += 'border-radius: 150px;'
     output += '-webkit-border-radius: 150px;-moz-border-radius: 150px;">'
     flash("You are now logged in as %s!" % login_session['username'])
-    print("Done!")
+    print("logged in.")
     return output
-#///////////////////////////////////////////////////////////////////////////////////
+
 
 #@app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
         print 'Access Token is None'
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps('Current user not connected.'), 
+        						 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' %\
+     	  login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
@@ -169,9 +167,11 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps('Failed to revoke token for given user.', 
+        									400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
 
 @app.route('/logout')
 def logout():
@@ -281,7 +281,8 @@ def add_item():
             categories=categories)
 
 
-@app.route("/catalog/category/<int:category_id>/item/new/", methods=['GET', 'POST'])
+@app.route("/catalog/category/<int:category_id>/item/new/", 
+		   methods=['GET', 'POST'])
 def add_item_by_category(category_id):
 
     if 'username' not in login_session:
@@ -416,10 +417,14 @@ def show_items_in_category(category_id):
     category = session.query(Category).filter_by(id=category_id).first()
     items = session.query(Item).filter_by(category_id=category.id).all()
     total = session.query(Item).filter_by(category_id=category.id).count()
-    return render_template('items.html', category=category, items=items, total=total)
+    return render_template('items.html', 
+    					   category=category, 
+    					   items=items, 
+    					   total=total)
 
 
-@app.route('/catalog/category/<int:category_id>/edit/', methods=['GET', 'POST'])
+@app.route('/catalog/category/<int:category_id>/edit/', 
+		   methods=['GET', 'POST'])
 def edit_category(category_id):
 
     category = session.query(Category).filter_by(id=category_id).first()
@@ -442,12 +447,14 @@ def edit_category(category_id):
             session.add(category)
             session.commit()
             flash('Category successfully updated!')
-            return redirect(url_for('show_items_in_category', category_id=category.id))
+            return redirect(url_for('show_items_in_category', 
+            						category_id=category.id))
     else:
         return render_template('edit_category.html', category=category)
 
 
-@app.route('/catalog/category/<int:category_id>/delete/', methods=['GET', 'POST'])
+@app.route('/catalog/category/<int:category_id>/delete/', 
+		   methods=['GET', 'POST'])
 def delete_category(category_id):
 
     category = session.query(Category).filter_by(id=category_id).first()
