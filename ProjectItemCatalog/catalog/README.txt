@@ -1,8 +1,12 @@
-Place your catalog project in this directory.
+# Deployment instructions
 
-1a. Deploy repository on server
-1b. Insure python libraries are installed: 
+
+1. Deploy repository on target server.
+2. Insure the python libraries are installed: 
 	sudo apt-get install python-flask python-sqlalchemy python-requests postgresql
-2. Initialise the database with: python database_setup.py
-3. Insert base item catalog into database: python database_init.py
-4. Run server code: python project.py
+3. Initialise the database:
+	python database_setup.py
+4. Insert some initial data into database:
+	python database_init.py
+5. Run webserver:
+	python project.py
