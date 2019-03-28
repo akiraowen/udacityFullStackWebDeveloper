@@ -245,7 +245,7 @@ def add_category():
         flash('New category %s successfully created!' % new_category.name)
         return redirect(url_for('home'))
     else:
-        return render_template('new-category.html')
+        return render_template('new_category.html')
 
 
 @app.route("/catalog/item/new/", methods=['GET', 'POST'])
@@ -276,7 +276,7 @@ def add_item():
         categories = session.query(Category).\
             filter_by(user_id=login_session['user_id']).all()
         return render_template(
-            'new-item.html',
+            'new_item.html',
             items=items,
             categories=categories)
 
@@ -306,7 +306,7 @@ def add_item_by_category(category_id):
                                 category_id=category_id))
     else:
         category = session.query(Category).filter_by(id=category_id).first()
-        return render_template('new-item-2.html', category=category)
+        return render_template('new_item_by_cat.html', category=category)
 
 
 def exists_item(item_id):
@@ -337,7 +337,7 @@ def view_item(item_id):
         category = session.query(Category)\
             .filter_by(id=item.category_id).first()
         owner = session.query(User).filter_by(id=item.user_id).first()
-        return render_template("view-item.html", 
+        return render_template("view_item.html", 
             item=item, 
             category=category, 
             owner=owner)
@@ -377,7 +377,7 @@ def edit_item(item_id):
         categories = session.query(Category).\
             filter_by(user_id=login_session['user_id']).all()
         return render_template(
-            'update-item.html',
+            'update_item.html',
             item=item,
             categories=categories)
 
