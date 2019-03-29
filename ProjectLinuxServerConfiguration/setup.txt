@@ -27,6 +27,7 @@ sudo ufw default allow outgoing
 sudo ufw allow 2200/tcp
 sudo ufw allow www
 sudo ufw allow ntp
+sudo ufw deny 22
 sudo ufw enable
 sudo ufw status
 
@@ -38,9 +39,11 @@ To                         Action      From
 2200/tcp                   ALLOW       Anywhere
 80/tcp                     ALLOW       Anywhere
 123                        ALLOW       Anywhere
+22                         DENY        Anywhere
 2200/tcp (v6)              ALLOW       Anywhere (v6)
 80/tcp (v6)                ALLOW       Anywhere (v6)
 123 (v6)                   ALLOW       Anywhere (v6)
+22 (v6)                    DENY        Anywhere (v6)
 
 exit
 ssh ubuntu@<yourpubliciphere> -p 2200 -i <yourLightsailDefaultKey>.pem
@@ -49,6 +52,7 @@ sudo usermod -aG sudo grader
 sudo dpkg-reconfigure tzdata
 -select None of the above -> UTC
 sudo apt-get install git apache2 postgresql libapache2-mod-wsgi
+Apache2 testing:
 sudo vi /etc/apache2/sites-enabled/000-default.conf
 -add this just above </VirtualHost>
 WSGIScriptAlias / /var/www/html/myapp.wsgi
@@ -67,5 +71,91 @@ def application(environ, start_response):
 -Verify page is loaded with "Hello Udacity!"
 -Return to Amazon Lightsail instance and delete the Networking->Firewall->SSH 22 Rule
 
-3. Deploy Item Project to /var/www/html
-git clone ... (TODO)
+3. Deploy Item Project to /var/www/
+Clone git repository
+Create the directory /var/www/catalog
+Copy the repository catalog/ directory to /var/www/catalog (so the result is /var/www/catalog/catalog/)
+sudo a2enmod wsgi
+vi /etc/postgresql/9.5/main/pg_hba.conf
+e.g
+local   all             postgres                                peer
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5
+
+Setup database:
+
+sudo su - postgres
+psql
+CREATE ROLE catalog WITH LOGIN;
+ALTER ROLE catalog CREATEDB;
+\password catalog
+\du
+\q
+exit
+sudo adduser catalog
+sudo visudo
+catalog ALL=(ALL:ALL) ALL
+sudo su - catalog
+sudo -l
+createdb catalog
+psql
+\l
+\q
+exit
+
+sudo chown -R ubuntu:ubuntu /var/www/catalog
+cd /var/www/catalog/catalog
+mv project.py __init__.py
+vi __init__.py
+Replace app.run(host='0.0.0.0', port=8000) -> app.run()
+
+vi /etc/apache2/sites-available/catalog.conf
+
+<VirtualHost *:80>
+                ServerName 13.236.165.218.xip.io
+                ServerAdmin anthony.owen@gmail.com
+                WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+                <Directory /var/www/catalog/catalog/>
+                        Order allow,deny
+                        Allow from all
+                        Options -Indexes
+                </Directory>
+                Alias /static /var/www/catalog/catalog/static
+                <Directory /var/www/catalog/catalog/static/>
+                        Order allow,deny
+                        Allow from all
+                        Options -Indexes
+                </Directory>
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                LogLevel warn
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+sudo a2ensite catalog
+sudo service apache2 reload
+
+vi /var/www/catalog/catalog.wsgi
+
+activate_this = '/var/www/catalog/catalog/venv/bin/activate_this.py'
+execfile(activate_this, dict(__file__=activate_this))
+
+#!/usr/bin/python
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0,"/var/www/catalog")
+sys.path.insert(0,"/var/www/catalog/catalog")
+
+from catalog import app as application
+application.secret_key = '12345'
+
+Update all files db: __init__.py, database_setup.py & database_init.py
+engine = create_engine('postgresql://catalog:<PASSWORD>@localhost/catalog')
+
+a2dissite 000-default.conf
+
+sudo service apache2 reload
+
+sudo chown -R www-data:www-data /var/www/catalog/
+
