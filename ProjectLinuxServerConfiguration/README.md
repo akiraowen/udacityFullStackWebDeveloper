@@ -101,7 +101,7 @@ Select None of the above -> UTC
 ### Apache2 testing:
 
 `sudo vi /etc/apache2/sites-enabled/000-default.conf`  
-Add at end of <VirtualHost> block:  
+Add at end of `<VirtualHost>` block:  
 `WSGIScriptAlias / /var/www/html/myapp.wsgi`  
 `sudo apache2ctl restart`  
 `cd /var/www/html/`  
@@ -116,7 +116,7 @@ def application(environ, start_response):
 
     return [output]
 ```
-Navigate to: http://<lightsailIP>/myapp.wsgi  
+Navigate to: http://`<lightsailIP>`/myapp.wsgi  
 Verify page is loaded with "Hello Udacity!"  
 Return to Amazon Lightsail instance and delete the Networking->Firewall->SSH 22 Rule  
 
@@ -134,9 +134,11 @@ ALTER ROLE catalog CREATEDB;
 `exit`  
 `sudo adduser catalog`  
 `sudo usermod -aG sudo grader`  
-^ OR \  
-`sudo visudo`  
-`catalog ALL=(ALL:ALL) ALL`  
+OR  
+```
+sudo visudo
+catalog ALL=(ALL:ALL) ALL
+```
 `sudo su - catalog`  
 `sudo -l`  
 `createdb catalog`  
@@ -152,8 +154,8 @@ local   all             postgres                                peer
 local   all             all                                     peer
 host    all             all             127.0.0.1/32            md5
 host    all             all             ::1/128                 md5
-exit
 ```
+`exit`  
 
 ### Deploy GIT Project
 
@@ -212,7 +214,7 @@ from catalog import app as application
 application.secret_key = '12345'
 ````
 
-Update all code to use postgredb: __init__.py, database_setup.py & database_init.py  
+Update all code to use postgredb: `__init__.py`, `database_setup.py` & `database_init.py`  
 `engine = create_engine('postgresql://catalog:<PASSWORD>@localhost/catalog')`  
 
 `a2dissite 000-default.conf`  
@@ -225,9 +227,11 @@ Update all code to use postgredb: __init__.py, database_setup.py & database_init
 setup grader:  
 `sudo adduser grader`  
 `sudo usermod -aG sudo grader`  
-^ OR \  
-`sudo visudo`  
-`grader ALL=(ALL:ALL) ALL`  
+OR
+```
+sudo visudo
+grader ALL=(ALL:ALL) ALL
+```
 `touch ~/.ssh/authorized_keys`  
 `chmod 700 ~/.ssh`  
 `chmod 644 ~/.ssh/authorized_keys`  
