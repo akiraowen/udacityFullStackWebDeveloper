@@ -1,27 +1,28 @@
-1. Amazon Lightsail:
+### Create web server on Amazon Lightsail
 
-https://lightsail.aws.amazon.com/ls/webapp/home/instances
+Navigate: https://lightsail.aws.amazon.com/ls/webapp/home/instances
 Select a platform->Linux/Unix
 Select a blueprint->OS Only->Ubuntu 16.04 LTS
 Create instance
--click the instance when state change to Running
--select Networking tab and add the following:
-SSH TCP 22
-HTTP	TCP	80
-Custom	UDP	123
-Custom	TCP	2200
--return to the Connect tab and the bottom of the page retreive your default private key from the Account page
+Click the instance when state change to Running
+Select Networking tab and add the following:
+    SSH TCP 22
+    HTTP	TCP	80
+    Custom	UDP	123
+    Custom	TCP	2200
+Return to the Connect tab and the bottom of the page retreive your default private key from the Account page
 
-2. Use Git Bash to connect to the instance
+### Setup ssh access and security of the instance
 
-ssh ubuntu@<yourpubliciphere> -p 22 -i <yourLightsailDefaultKey>.pem
+ssh ubuntu@<lightsailIP> -p 22 -i <yourLightsailDefaultKey>.pem
 sudo apt-get update
 sudo apt-get upgrade
 sudo vi /etc/ssh/sshd_config
-(Change Port 22 -> Port 2200)
+Change Port 22 -> Port 2200
+Check that PasswordAuthentication No
 sudo service sshd restart
 exit
-ssh ubuntu@<yourpubliciphere> -p 2200 -i <yourLightsailDefaultKey>.pem
+ssh ubuntu@<lightsailIP> -p 2200 -i <yourLightsailDefaultKey>.pem
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow 2200/tcp
@@ -31,7 +32,8 @@ sudo ufw deny 22
 sudo ufw enable
 sudo ufw status
 
-e.g:
+Output:
+
 Status: active
 
 To                         Action      From
@@ -46,19 +48,20 @@ To                         Action      From
 22 (v6)                    DENY        Anywhere (v6)
 
 exit
-ssh ubuntu@<yourpubliciphere> -p 2200 -i <yourLightsailDefaultKey>.pem
-sudo adduser grader
-sudo usermod -aG sudo grader
+ssh ubuntu@<lightsailIP> -p 2200 -i <yourLightsailDefaultKey>.pem
 sudo dpkg-reconfigure tzdata
--select None of the above -> UTC
+Select None of the above -> UTC
 sudo apt-get install git apache2 postgresql libapache2-mod-wsgi
-Apache2 testing:
+
+### Optional apache2 testing:
+
 sudo vi /etc/apache2/sites-enabled/000-default.conf
--add this just above </VirtualHost>
+Add at end of <VirtualHost> block:
 WSGIScriptAlias / /var/www/html/myapp.wsgi
 sudo apache2ctl restart
 cd /var/www/html/
 nano myapp.wsgi
+```
 def application(environ, start_response):
     status = '200 OK'
     output = 'Hello Udacity!'
@@ -67,23 +70,12 @@ def application(environ, start_response):
     start_response(status, response_headers)
 
     return [output]
--Navigate to: http://<yourpubliciphere>/myapp.wsgi
--Verify page is loaded with "Hello Udacity!"
--Return to Amazon Lightsail instance and delete the Networking->Firewall->SSH 22 Rule
+```
+Navigate to: http://<lightsailIP>/myapp.wsgi
+Verify page is loaded with "Hello Udacity!"
+Return to Amazon Lightsail instance and delete the Networking->Firewall->SSH 22 Rule
 
-3. Deploy Item Project to /var/www/
-Clone git repository
-Create the directory /var/www/catalog
-Copy the repository catalog/ directory to /var/www/catalog (so the result is /var/www/catalog/catalog/)
-sudo a2enmod wsgi
-vi /etc/postgresql/9.5/main/pg_hba.conf
-e.g
-local   all             postgres                                peer
-local   all             all                                     peer
-host    all             all             127.0.0.1/32            md5
-host    all             all             ::1/128                 md5
-
-Setup database:
+### Setup SQL database:
 
 sudo su - postgres
 psql
@@ -94,6 +86,8 @@ ALTER ROLE catalog CREATEDB;
 \q
 exit
 sudo adduser catalog
+sudo usermod -aG sudo grader
+^ OR \
 sudo visudo
 catalog ALL=(ALL:ALL) ALL
 sudo su - catalog
@@ -102,7 +96,21 @@ createdb catalog
 psql
 \l
 \q
+vi /etc/postgresql/9.5/main/pg_hba.conf
+
+local   all             postgres                                peer
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5
 exit
+
+### Deploy GIT Project
+
+Clone GIT project to ~
+Create the directory /var/www/catalog
+Copy the repository catalog/ directory to /var/www/catalog
+So the result is /var/www/catalog/catalog/<project files>
+sudo a2enmod wsgi
 
 sudo chown -R ubuntu:ubuntu /var/www/catalog
 cd /var/www/catalog/catalog
@@ -112,6 +120,7 @@ Replace app.run(host='0.0.0.0', port=8000) -> app.run()
 
 vi /etc/apache2/sites-available/catalog.conf
 
+```
 <VirtualHost *:80>
                 ServerName 13.236.165.218.xip.io
                 ServerAdmin anthony.owen@gmail.com
@@ -131,12 +140,13 @@ vi /etc/apache2/sites-available/catalog.conf
                 LogLevel warn
                 CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
+```
 
 sudo a2ensite catalog
 sudo service apache2 reload
 
 vi /var/www/catalog/catalog.wsgi
-
+```
 activate_this = '/var/www/catalog/catalog/venv/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 
@@ -149,13 +159,33 @@ sys.path.insert(0,"/var/www/catalog/catalog")
 
 from catalog import app as application
 application.secret_key = '12345'
+````
 
-Update all files db: __init__.py, database_setup.py & database_init.py
+Update all code to use postgredb: __init__.py, database_setup.py & database_init.py
 engine = create_engine('postgresql://catalog:<PASSWORD>@localhost/catalog')
 
 a2dissite 000-default.conf
-
 sudo service apache2 reload
 
 sudo chown -R www-data:www-data /var/www/catalog/
 
+# Setup Udacity grader account
+
+setup grader:
+sudo adduser grader
+sudo usermod -aG sudo grader
+^ OR \
+sudo visudo
+grader ALL=(ALL:ALL) ALL
+touch ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 644 ~/.ssh/authorized_keys
+nano ~/.ssh/authorized_keys
+
+On your local machine:
+ssh-keygen grader_key
+cat ~/.ssh/grader_key.pub
+Paste the key contents into the authorized_keys file in the grader account on the server.
+
+Test connection:
+ssh grader@13.236.165.218 -p 2200 -i ~/.ssh/grader_key
