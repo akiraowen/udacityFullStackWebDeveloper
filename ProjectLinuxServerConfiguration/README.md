@@ -38,7 +38,9 @@ flask
   Amazon Lightsail  
   bootstrapcdn.com (fontawesome.com)  
 
+*** 
 
+## Detailed setup instructions
 
 ### Create web server on Amazon Lightsail
 
