@@ -1,2 +1,0 @@
-No.1: Add Item Project deployment steps
-No.2: Test run webserver deployment steps
