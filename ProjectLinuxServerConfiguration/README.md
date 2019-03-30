@@ -24,9 +24,10 @@ json
 requests
 flask
 ```
+  Overview of steps carried out:
   1. Creation of Amazon Lightsail server
   2. Adjusting server ports for SSH on 2200, NTP on 123 and HTTP on 80
-  3. Lock down SSH daemon
+  3. Lock down SSH daemon & firewall
   4. Install webserver components and test wsgi on apache2
   5. Create PostresSQL user and database ready for app use
   6. Deploy GIT repostory and adjust code/permissions/config for apache2
