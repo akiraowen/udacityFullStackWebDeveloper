@@ -15,8 +15,8 @@ Return to the Connect tab and the bottom of the page retreive your default priva
 ### Setup ssh access and security of the instance
 
 ssh ubuntu@<lightsailIP> -p 22 -i <yourLightsailDefaultKey>.pem
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt update
+sudo apt upgrade
 sudo vi /etc/ssh/sshd_config
 Change Port 22 -> Port 2200
 Check that PasswordAuthentication No
