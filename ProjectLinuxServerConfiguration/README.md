@@ -163,14 +163,14 @@ host    all             all             ::1/128                 md5
 Clone GIT project to ~  
 Create the directory /var/www/catalog  
 Copy the repository catalog/ directory to /var/www/catalog  
-So the result is /var/www/catalog/catalog/<project files>  
+So the result is /var/www/catalog/catalog/`<project files>`  
 `sudo a2enmod wsgi`  
 
 `sudo chown -R ubuntu:ubuntu /var/www/catalog`  
 `cd /var/www/catalog/catalog`  
 `mv project.py __init__.py`  
 `vi __init__.py`  
-Replace app.run(host='0.0.0.0', port=8000) -> app.run()  
+Replace `app.run(host='0.0.0.0', port=8000)` -> `app.run()`  
 
 `vi /etc/apache2/sites-available/catalog.conf`  
 
