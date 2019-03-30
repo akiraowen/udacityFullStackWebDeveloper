@@ -38,7 +38,7 @@ session.commit()
 
 item_1 = Item(
     name='Bitcoin',
-    description='Bitcoin (BTC) is a cryptocurrency, a form of electronic cash. It is a decentralized digital currency without a central bank or single administrator that can be sent from user to user on the peer-to-peer bitcoin network without the need for intermediaries.',
+    description='Bitcoin (BTC) is a cryptocurrency.',
     category=category_1,
     user=user_1
 )
@@ -47,7 +47,7 @@ session.commit()
 
 item_2 = Item(
     name='Litecoin',
-    description='Litecoin (LTC) is a peer-to-peer cryptocurrency and open-source software project released under the MIT/X11 license.',
+    description='Litecoin (LTC) is a peer-to-peer cryptocurrency.',
     category=category_1,
     user=user_1
 )
@@ -64,7 +64,7 @@ session.commit()
 
 item_3 = Item(
     name='USD',
-    description='The United States dollar (sign: $; code: USD; also abbreviated US$ and referred to as the dollar, U.S. dollar, or American dollar) is the official currency of the United States and its territories per the United States Constitution since 1792.',
+    description='The United States dollar (sign: $; code: USD).',
     category=category_2,
     user=user_1
 )
@@ -73,7 +73,7 @@ session.commit()
 
 item_4 = Item(
     name='AUD',
-    description='The Australian dollar (sign: $; code: AUD) is the currency of Australia (including its external territories Christmas Island, Cocos (Keeling) Islands, and Norfolk Island), and of three independent Pacific Island states, specifically Kiribati, Nauru, and Tuvalu.',
+    description='The Australian dollar (sign: $; code: AUD).',
     category=category_2,
     user=user_1
 )
