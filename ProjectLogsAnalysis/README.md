@@ -7,7 +7,8 @@ Load up and check the database:
 `psql -d news`
 `psql`
 
-These views are created within the python script and are here from reference.  
+The following views are created within the python script and are here from reference. They provide assistance for the more complicated error question (3).  
+
 ```
         CREATE VIEW error_view AS
         SELECT date_trunc('day', time) "day", count(*) AS requests
