@@ -2,7 +2,7 @@
 
 The structure of the script is quite straight forward, there are three functions that retreive the answers to the questions.  
 
-These views are created within the python script and are here from reference.  
+The following views are created within the python script and are here from reference. They provide assistance for the more complicated error question (3).  
 ```
         CREATE VIEW error_view AS
         SELECT date_trunc('day', time) "day", count(*) AS requests
@@ -20,9 +20,9 @@ These views are created within the python script and are here from reference.
 ### How to run
 
 Load up and check the database:  
-`psql -d news -f newsdata.sql`
-`psql -d news`
-`psql`
+`psql -d news -f newsdata.sql`  
+`psql -d news`  
+`psql`  
 Execute the analysis script:  
 `$ python logs_analysis.py`
 
