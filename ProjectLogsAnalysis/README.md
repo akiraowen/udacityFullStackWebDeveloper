@@ -2,6 +2,11 @@
 
 The structure of the script is quite straight forward, there are three functions that retreive the answers to the questions.  
 
+Load up and check the database:  
+`psql -d news -f newsdata.sql`
+`psql -d news`
+`psql`
+
 These views are created within the python script and are here from reference.  
 ```
         CREATE VIEW error_view AS
@@ -19,12 +24,8 @@ These views are created within the python script and are here from reference.
 
 ### How to run
 
-Load up and check the database:  
-`psql -d news -f newsdata.sql`
-`psql -d news`
-`psql`
 Execute the analysis script:  
-`$ python logs_analysis.py`
+`$ python3 logs_analysis.py`
 
 ### Output sample
 ```

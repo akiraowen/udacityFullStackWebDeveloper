@@ -6,12 +6,19 @@ DATABASE_NAME = "news"
 
 
 def execute_query_string(query_string):
-    db = psycopg2.connect('dbname=' + DATABASE_NAME)
-    cur = db.cursor()
-    cur.execute(query_string)
-    res = cur.fetchall()
-    db.close()
-    return res
+    try:
+        db = psycopg2.connect('dbname=' + DATABASE_NAME)
+    except psycopg2.Error as e:
+        print("Unable to connect!")
+        print(e.pgerror)
+        print(e.diag.message_detail)
+        sys.exit(1)
+    else:
+        cur = db.cursor()
+        cur.execute(query_string)
+        res = cur.fetchall()
+        db.close()
+        return res
 
 
 def most_popular_articles():
@@ -32,7 +39,7 @@ def most_popular_articles():
     # Present results
     print('1. What are the most popular three articles of all time?')
     for r in results:
-        print("\"" + r[0] + "\" @ " + str(r[1]) + " views")
+        print("\"{}\" @ {} views".format(r[0], str(r[1])))
 
 
 def most_popular_article_authors():
@@ -56,7 +63,7 @@ def most_popular_article_authors():
     # Present results
     print('2. Who are the most popular article authors of all time?')
     for r in results:
-        print("\"" + r[0] + "\" @ " + str(r[1]) + " views")
+        print("\"{}\" @ {} views".format(r[0], str(r[1])))
 
 
 def days_with_requests_erros():
@@ -91,7 +98,7 @@ def days_with_requests_erros():
     for r in results:
         date = r[0].strftime('%B %d, %Y')
         error = str(round(r[1] * 100, 1)) + "%" + " errors"
-        print(date + " - " + error)
+        print("{} - {}".format(date, error))
 
 
 if __name__ == "__main__":
